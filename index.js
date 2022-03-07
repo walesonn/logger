@@ -1,4 +1,5 @@
 import { exec } from "child_process";
+import install from "./install.js";
 import path from "path";
 import fs from "fs";
 import replaceAll from "./replaceAll.js";
@@ -64,15 +65,18 @@ function run(fileOrDir) {
   }
 }
 
-function blockedIps() {
+function blockedIpsOfJail(jail, filename) {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!process.argv[2]) return reject(new Error("Not arguments"));
+      if (!jail) return reject(new Error("Not arguments"));
 
-      let cmd = `sudo fail2ban-client status ${process.argv[2]} | grep "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}" > ~/blockedIps.log`;
+      let file = path.resolve(`~/${filename ?? "blockedIps.log"}`);
+
+      let cmd = `sudo fail2ban-client status ${jail} | grep "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}" > ${file}"`;
+
       exec(cmd, (err, stdout) => {
         if (err) throw err;
-        resolve();
+        resolve({ data: stdout, file: file });
       });
     } catch (error) {
       reject(error);
@@ -80,10 +84,12 @@ function blockedIps() {
   });
 }
 
-blockedIps()
-  .then(() => {
-    run(path.resolve(`~/blockedIps.log`));
-  })
-  .catch((error) => {
-    console.log(error);
+if (!process.argv[2]) {
+  console.log(
+    "Manual usage: node index.js --jail=<jailName> --outfile=<outfileName>"
+  );
+} else {
+  blockedIpsOfJail(process.argv[2], "test.log").then((data) => {
+    console.log(data);
   });
+}
