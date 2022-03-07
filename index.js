@@ -74,9 +74,9 @@ function blockedIpsOfJail(jail, filename) {
 
       let cmd = `sudo fail2ban-client status ${jail} | grep "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}" > ${file}`;
 
-      exec(cmd, (err, stdout) => {
+      exec(cmd, (err, stdout, stderr) => {
         if (err) return reject(err);
-        resolve({ data: stdout, file: file });
+        resolve({ stdout: stdout, stderr: stderr, file: file });
       });
     } catch (error) {
       reject(error);
