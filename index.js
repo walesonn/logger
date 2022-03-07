@@ -3,26 +3,26 @@ import path from "path";
 import fs from "fs";
 import replaceAll from "./replaceAll.js";
 
-function run() {
-  if (!process.argv[2]) {
+function run(fileOrDir) {
+  if (!fileOrDir) {
     console.log("Manual usage: node index <filename>");
   } else {
-    if (!fs.existsSync(path.resolve(process.argv[2]))) {
+    if (!fs.existsSync(path.resolve(fileOrDir))) {
       console.log("File not found");
       return;
     }
 
-    fs.lstat(path.resolve(process.argv[2]), (err, stats) => {
+    fs.lstat(path.resolve(fileOrDir), (err, stats) => {
       if (err) throw err;
 
       if (!stats.isDirectory() && !stats.isFile())
         throw Error("Arguments not is file or directory");
 
       if (stats.isFile()) {
-        console.log(`Is File ${path.resolve(process.argv[2])}`);
+        console.log(`Is File ${path.resolve(fileOrDir)}`);
 
         fs.readFile(
-          path.resolve(process.argv[2]),
+          path.resolve(fileOrDir),
           { encoding: "utf-8" },
           (err, data) => {
             if (err) throw err;
@@ -34,36 +34,31 @@ function run() {
       }
 
       if (stats.isDirectory()) {
-        console.log(`Is Directory ${path.resolve(process.argv[2])}`);
-        exec(
-          `ls -a ${path.resolve(process.argv[2])}`,
-          (err, stdout, stderr) => {
-            if (err) throw err;
+        console.log(`Is Directory ${path.resolve(fileOrDir)}`);
+        exec(`ls -a ${path.resolve(fileOrDir)}`, (err, stdout, stderr) => {
+          if (err) throw err;
 
-            let files = stdout.split("\n");
+          let files = stdout.split("\n");
 
-            if (!files.length) return console.log("Directory empty");
+          if (!files.length) return console.log("Directory empty");
 
-            const allLogFiles = files.filter(
-              (filename) =>
-                filename.indexOf(".log") != -1 || filename.indexOf(".gz") != -1
-            );
+          const allLogFiles = files.filter(
+            (filename) =>
+              filename.indexOf(".log") != -1 || filename.indexOf(".gz") != -1
+          );
 
-            allLogFiles.forEach((file) => {
-              if (
-                path.resolve(`${process.argv[2]}/${file}`).indexOf(".gz") != -1
-              ) {
-                console.log(path.resolve(`${process.argv[2]}/${file}`));
-                exec(
-                  `sudo gunzip ${path.resolve(`${process.argv[2]}/${file}`)}`,
-                  (err) => {
-                    if (err) throw err;
-                  }
-                );
-              }
-            });
-          }
-        );
+          allLogFiles.forEach((file) => {
+            if (path.resolve(`${fileOrDir}/${file}`).indexOf(".gz") != -1) {
+              console.log(path.resolve(`${fileOrDir}/${file}`));
+              exec(
+                `sudo gunzip ${path.resolve(`${fileOrDir}/${file}`)}`,
+                (err) => {
+                  if (err) throw err;
+                }
+              );
+            }
+          });
+        });
       }
     });
   }
@@ -84,8 +79,5 @@ function blockedIps() {
 }
 
 blockedIps().then(() => {
-  exec(`node ~/logger/index.js ~/blockedIps.log`, (err, stdout) => {
-    if (err) throw err;
-    console.log(stdout);
-  });
+  run(path.resolve(`~/blockedIps.log`));
 });
