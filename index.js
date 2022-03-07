@@ -55,7 +55,7 @@ function run() {
               ) {
                 console.log(path.resolve(`${process.argv[2]}/${file}`));
                 exec(
-                  `gunzip ${path.resolve(`${process.argv[2]}/${file}`)}`,
+                  `sudo gunzip ${path.resolve(`${process.argv[2]}/${file}`)}`,
                   (err) => {
                     if (err) throw err;
                   }
