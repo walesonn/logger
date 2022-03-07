@@ -93,6 +93,6 @@ if (!process.argv[2]) {
     process.argv[2].split("=")[1],
     process.argv[3] ? process.argv[3].split("=")[1] : null
   ).then((data) => {
-    console.log(data);
+    run(data.file);
   });
 }
