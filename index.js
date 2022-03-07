@@ -70,7 +70,7 @@ function blockedIpsOfJail(jail, filename) {
     try {
       if (!jail) return reject(new Error("Not arguments"));
 
-      let file = `~/${filename ?? "blockedIps.log"}`;
+      let file = path.resolve(`${filename ?? "blockedIps.log"}`);
 
       let cmd = `sudo fail2ban-client status ${jail} | grep "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}" > ${file}"`;
 
