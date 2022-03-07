@@ -67,6 +67,8 @@ function run(fileOrDir) {
 function blockedIps() {
   return new Promise(async (resolve, reject) => {
     try {
+      if (!process.argv[2]) return reject(new Error("Not arguments"));
+
       let cmd = `sudo fail2ban-client status ${process.argv[2]} | grep "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}" > ~/blockedIps.log`;
       exec(cmd, (err, stdout) => {
         if (err) throw err;
@@ -78,6 +80,10 @@ function blockedIps() {
   });
 }
 
-blockedIps().then(() => {
-  run(path.resolve(`~/blockedIps.log`));
-});
+blockedIps()
+  .then(() => {
+    run(path.resolve(`~/blockedIps.log`));
+  })
+  .catch((error) => {
+    console.log(error);
+  });
