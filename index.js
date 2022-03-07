@@ -89,7 +89,10 @@ if (!process.argv[2]) {
     "Manual usage: node index.js --jail=<jailName> --outfile=<outfileName>"
   );
 } else {
-  blockedIpsOfJail(process.argv[2], "test.log").then((data) => {
+  blockedIpsOfJail(
+    process.argv[2].split("=")[1],
+    process.argv[3] ? process.argv[3].split("=")[1] : null
+  ).then((data) => {
     console.log(data);
   });
 }
