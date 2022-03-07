@@ -69,4 +69,23 @@ function run() {
   }
 }
 
-run();
+function blockedIps() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let cmd = `sudo fail2ban-client status ${process.argv[2]} | grep "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}" > ~/blockedIps.log`;
+      exec(cmd, (err, stdout) => {
+        if (err) throw err;
+        resolve();
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+blockedIps().then(() => {
+  exec(`node ~/logger/index.js ~/blockedIps.log`, (err, stdout) => {
+    if (err) throw err;
+    console.log(stdout);
+  });
+});
